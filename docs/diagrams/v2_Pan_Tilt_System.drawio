@@ -1,0 +1,58 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="VaSrzQMH-xx5tNFzF3EM">
+    <mxGraphModel dx="1372" dy="701" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="v2-title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;fontStyle=1" value="Pan-Tilt System &#8212; v2 (two-node, Bluetooth link)" vertex="1">
+          <mxGeometry height="30" width="520" x="20" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-hh-node" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=light-dark(#000000,#FFFFFF);" value="&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;&lt;b&gt;&lt;u&gt;Handheld Node&lt;/u&gt;&lt;/b&gt;&lt;br&gt;(ESP32)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="80" width="120" x="100" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-desk-node" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=light-dark(#000000,#FFFFFF);" value="&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;&lt;b&gt;&lt;u&gt;Motion Control Node&lt;/u&gt;&lt;/b&gt;&lt;br&gt;(STM32)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="80" width="120" x="560" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-link" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=11;dashed=1;" value="Bluetooth Classic (SPP)&#10;angles + counter + auth" edge="1" source="v2-hh-node" target="v2-desk-node">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-hh-phys-edge" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" source="v2-hh-node" target="v2-hh-phys">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-hh-sw-edge" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" source="v2-hh-node" target="v2-hh-sw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-desk-phys-edge" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" source="v2-desk-node" target="v2-desk-phys">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-desk-sw-edge" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" source="v2-desk-node" target="v2-desk-sw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-hh-phys" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);align=left;" value="&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;&lt;b&gt;Physical Features&lt;/b&gt;:&lt;br&gt;&lt;br&gt;- Capability to track orientation&lt;br&gt;- Runs off a USB power bank&lt;br&gt;- Bluetooth radio on-chip (no module)&lt;br&gt;- Fully cordless&lt;/span&gt;" vertex="1">
+          <mxGeometry height="170" width="120" x="20" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-hh-sw" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);align=left;" value="&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;&lt;b&gt;Software Features:&lt;/b&gt;&lt;br&gt;&#8211; IMU I2C&lt;br&gt;&#9;&#8211; Complementary filter&lt;br&gt;&#9;&#8211; Gyro bias calibration&lt;br&gt;&#9;&#8211; Yaw drift = known limit&lt;br&gt;&#8211; Bluetooth serial (SPP)&lt;br&gt;&#9;&#8211; Fixed rate TX&lt;br&gt;&#9;&#8211; Packet + counter + auth&lt;br&gt;&#8211; Fault handling&lt;br&gt;&#9;&#8211; IMU timeout&lt;br&gt;&#9;&#8211; Link loss&lt;/span&gt;" vertex="1">
+          <mxGeometry height="180" width="140" x="180" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-hh-parts" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);align=left;" value="&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;&lt;b&gt;Parts&lt;/b&gt;:&lt;br&gt;&lt;br&gt;- ESP32 ESP-WROOM-32 (30-pin, Type-C)&lt;br&gt;- MPU-6050 IMU&lt;br&gt;- USB power bank&lt;br&gt;- Half breadboard&lt;br&gt;- Status LED&lt;/span&gt;" vertex="1">
+          <mxGeometry height="170" width="140" x="20" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-desk-phys" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);align=left;" value="&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;&lt;b&gt;Physical Features&lt;/b&gt;:&lt;br&gt;&lt;br&gt;- HC-05 as only wireless path in&lt;br&gt;- Pan-tilt servo platform&lt;br&gt;- Separate 6V servo supply&lt;br&gt;- OLED screen&lt;br&gt;- USB to PC (telemetry + debug)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="170" width="140" x="470" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-desk-sw" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);align=left;" value="&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;&lt;b&gt;Software Features:&lt;/b&gt;&lt;br&gt;&#8211; UART receive from HC-05&lt;br&gt;&#9;&#8211; Framing + parse&lt;br&gt;&#9;&#8211; Validate auth + counter&lt;br&gt;&#8211; Timeout detect (deadman)&lt;br&gt;&#8211; Angle clamp / blind-spot bounds&lt;br&gt;&#8211; Rate limit&lt;br&gt;&#8211; Timer PWM x2 (pan, tilt)&lt;br&gt;&#8211; Safe-state machine&lt;br&gt;&#9;&#8211; Init / Normal / Degraded / Safe&lt;br&gt;&#9;&#8211; Park position&lt;br&gt;&#8211; Watchdog&lt;br&gt;&#8211; OLED status + serial to PC&lt;/span&gt;" vertex="1">
+          <mxGeometry height="200" width="150" x="640" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-desk-parts" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);align=left;" value="&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;&lt;b&gt;Parts&lt;/b&gt;:&lt;br&gt;&lt;br&gt;- NUCLEO-F401RE (F446RE on loan for bring-up)&lt;br&gt;- HC-05 Bluetooth module&lt;br&gt;- Yahboom 2DOF pan-tilt&lt;br&gt;&#9;&#8211; pan 20kg 270&#176;, tilt 25kg 180&#176;&lt;br&gt;- 6V 5A supply + barrel screw terminal&lt;br&gt;- 1000&#181;F cap, 22AWG power leads&lt;br&gt;- SSD1306 OLED (I2C)&lt;br&gt;- Status LED&lt;br&gt;- END EFFECTOR? (rangefinder / laser / camera / thermal)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="200" width="150" x="470" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-goals" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);align=left;" value="&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;&lt;u&gt;&lt;b&gt;Project Goals:&lt;/b&gt;&lt;/u&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;A pan-tilt mount driven over a wireless link, mirroring a handheld IMU in real time with authenticated packets and fail-safe handling&lt;/b&gt;&lt;br&gt;&lt;br&gt;&#8211; Wireless architecture&lt;br&gt;&#9;&#8211; ESP32 &#8594; HC-05 &#8594; STM32&lt;br&gt;&#9;&#8211; Sense / act split across nodes&lt;br&gt;&#8211; FreeRTOS task design&lt;br&gt;&#9;&#8211; What tasks?&lt;br&gt;&#9;&#8211; Priority?&lt;br&gt;&#9;&#8211; RAM/Stack for each?&lt;br&gt;&#9;&#8211; Communication?&lt;br&gt;&#9;&#8211; Timing?&lt;br&gt;&#8211; Safety-critical practice&lt;br&gt;&#9;&#8211; Fail handling&lt;br&gt;&#9;&#8211; Deterministic behavior&lt;br&gt;&#9;&#8211; Version control&lt;br&gt;&#8211; Requirements traceability&lt;br&gt;&#9;&#8211; Code correlates to requirement&lt;br&gt;&#9;&#8211; Test to prove&lt;br&gt;&#8211; Fault handling and safe-state machine&lt;br&gt;&#9;&#8211; Ensures system is active, else&lt;br&gt;&#9;throw error or timeout&lt;br&gt;&#9;&#8211; Explicit states for each node&lt;br&gt;&#8211; Authenticated radio packets&lt;br&gt;&#8211; KiCad schematics&lt;br&gt;&lt;br&gt;&lt;b&gt;Stretch:&lt;/b&gt;&lt;br&gt;&#8211; Static allocation&lt;br&gt;&#9;&#8211; Memory fixed at compile&lt;br&gt;&#8211; MPU task isolation&lt;br&gt;&#9;&#8211; FreeRTOS-MPU port&lt;br&gt;&#9;&#8211; STM32CubeIDE&lt;br&gt;&#8211; CAN bus node (deferred, F446 supports it)&lt;br&gt;&#8211; Magnetometer for yaw&lt;br&gt;&#8211; End effector on mount&lt;/span&gt;" vertex="1">
+          <mxGeometry height="620" width="240" x="880" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="v2-changelog" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);align=left;dashed=1;" value="&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;&lt;b&gt;Changes from v1:&lt;/b&gt;&lt;br&gt;&#8211; Bridge node removed (3 nodes &#8594; 2)&lt;br&gt;&#8211; CAN moved to stretch goals&lt;br&gt;&#8211; Handheld is ESP32, not STM32&lt;br&gt;&#8211; Link is Bluetooth Classic, not nRF24/HC-12&lt;br&gt;&#8211; Boards: F401RE / F446RE, not G431KB&lt;br&gt;&#8211; Servos are mismatched: 270&#176; pan / 180&#176; tilt&lt;/span&gt;" vertex="1">
+          <mxGeometry height="130" width="240" x="180" y="720" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
