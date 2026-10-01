@@ -1,3 +1,13 @@
 ref, description, manufacturer_part, qty, unit_price, supplier, link, status, notes
 U1,"STM32 Nucleo-64 development board, STM32F401RE MCU, on-board ST-LINK/V2-1",NUCLEO-F401RE,1,23.99,Amazon (STMicroelectronics),https://www.amazon.com/dp/PLACEHOLDER,ordered,"None"
-U2
+U1,"ESP32 ESP-WROOM-32 dev board, 30-pin, USB-C, CP2102",ESP32-WROOM-32,1,8.99,Amazon (AITRIP),,ordered,"Handheld node. Original ESP32 — Bluetooth Classic required for HC-05 link."
+H1.U2,"9-axis IMU breakout, 16-bit accel + gyro + magnetometer, I2C/SPI",MPU-9250 (GY-9250),1,,,,on hand,"Magnetometer (AK8963) is a separate die at its own I2C address — enable pass-through on the MPU to reach it. Yaw unused in v1. Verify WHO_AM_I at first bring-up."
+H1.BT1,"USB power bank, 5V output",,1,,,,on hand,"Makes handheld fully cordless."
+MC1.U2,"Bluetooth Classic serial module with breakout and EN button",HC-05 (DSD TECH),1,,,,to order,"Configure to master mode over AT, bind to H1.U1 address."
+MC1.U3,"OLED display 0.96in 128x64, I2C",SSD1306,1,,,,to order,"4-pin I2C version, not 7-pin SPI."
+MC1.M1,"Digital servo, 20kg-cm, 270 deg travel — pan axis",Yahboom,1,,,,on hand,"Part of pan-tilt mount. Confirm pulse width range in Yahboom docs."
+MC1.M2,"Digital servo, 25kg-cm, 180 deg travel — tilt axis",Yahboom,1,,,,on hand,"Part of pan-tilt mount. Mismatched travel vs pan — separate clamp per axis."
+MC1.MP1,"2DOF aluminum pan-tilt bracket, M3 mounting, ~60.5mm U-bracket width",Yahboom,1,,,,on hand,"Measure inner gap and hole spacing before mounting any end effector."
+MC1.PS1,"AC/DC adapter, 6V 5A, center positive",AYD-0650,1,,,,on hand,"Servo supply only. Ground must tie to MC1.U1 ground."
+MC1.J1,"Barrel jack to screw terminal adapter, 5.5x2.1mm",,1,,,,on hand,"Check current rating of existing adapter."
+,"Silicone or solid-core hookup wire, 20-22 AWG, red and black",,1,,,,to order,"Servo power run only. Solid core if it enters a breadboard."
