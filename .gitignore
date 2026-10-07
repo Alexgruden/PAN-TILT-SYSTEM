@@ -5,6 +5,7 @@
 *.kicad_sch-bak
 *.kicad_pcb-bak
 fp-info-cache
+*.bak
 
 # Editor
 .history/

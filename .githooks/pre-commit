@@ -1,8 +1,10 @@
 #!/bin/sh
 KICAD_CLI="/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"
 
-find . -name "*.kicad_sch" -not -path "./.history/*" -not -path "*-backups/*" | while read -r sch; do
-  svg="${sch%.kicad_sch}.svg"
-  "$KICAD_CLI" sch export svg --output "$(dirname "$sch")" "$sch" 2>/dev/null || exit 1
-  git add "$svg"
+find . -name "*.kicad_sch" -not -path "*/.history/*" -not -path "*-backups/*" | while read -r sch; do
+  pdf="${sch%.kicad_sch}.pdf"
+  "$KICAD_CLI" sch export pdf --output "$pdf" "$sch" 2>/dev/null
+  git add "$pdf"
 done
+
+exit 0
