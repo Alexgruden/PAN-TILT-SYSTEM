@@ -28,3 +28,30 @@
 ```
 
 ## Comunication protocol and bidirectional flow
+
+### Frame Matrix 
+- This outlines the communication frames which will be sent from the ESP 32 to the HC-05 and back from the HC-05 to the ESP32
+- The communication will be done using 9-byte frames to ensure as small of a payload over bluetooth as possible.
+    - This will save bandwidth compaired to sending padded frames.
+
+### Forward frame
+- Sent every 20ms, this should match with the standard servo refresh rate (50hz)
+```
++-----------+-----------+---------------+---------------+----------+---------+
+
+| PREAMBLE  | TYPE ID   | PAN DATA (X)  | TILT DATA (Y) | SEQUENCE | CHKSUM  |
+|  (2 Bytes)|  (1 Byte) |   (2 Bytes)   |   (2 Bytes)   |  (1 Byte)| (1 Byte)|
+| 0xAA 0x55 |   0x01    |  int16_t MSB  |  int16_t MSB  |  uint8_t | XOR Val |
++-----------+-----------+---------------+---------------+----------+---------+
+```
+
+### Backward frame
+- Sent every 100ms, this is slower since the OLED takes longer to refresh
+```
++-----------+-----------+---------------+---------------+----------+---------+
+
+| PREAMBLE  | TYPE ID   | SERVO STEPS X | SERVO STEPS Y | SYS_STAT | CHKSUM  |
+|  (2 Bytes)|  (1 Byte) |   (2 Bytes)   |   (2 Bytes)   |  (1 Byte)| (1 Byte)|
+| 0xAA 0x55 |   0x02    |  uint16_t MSB |  uint16_t MSB | Bitfield | XOR Val |
++-----------+-----------+---------------+---------------+----------+---------+
+```
