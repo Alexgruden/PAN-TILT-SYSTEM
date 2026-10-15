@@ -8,6 +8,8 @@ fp-info-cache
 *.bak
 
 # Editor
+build/
+CMakeUserPresets.json
 .history/
 .vscode/
 .DS_Store
