@@ -7,6 +7,11 @@
 fp-info-cache
 *.bak
 
+# ESP-IDF
+.cache/
+sdkconfig.old
+managed_components/
+
 # Editor
 build/
 CMakeUserPresets.json
