@@ -56,4 +56,17 @@ int main() {
     assert(decode_result3);  // should return true
     printf("Received forward frame3, roundtrip successful\n");
     printf("Recieved Known frame3, Decoded frame : pan=%d, tilt=%d, sequence=%d, Known answer successful\n", decoded_frame3.pan, decoded_frame3.tilt, decoded_frame3.sequence);
+
+    // Encode a frame with pan=0, tilt=-0, sequence=0, and incorrect ID
+    memset(buffer, 0, FRAME_LEN);
+    ForwardFrame f4;
+    f4.pan = 0;
+    f4.tilt = 0; // 
+    f4.sequence = 0;
+    frame_encode(&f4, buffer);
+    buffer[2] = 0xFF; // corrupt the type ID
+
+    ForwardFrame decoded_frame4;
+    bool decode_result4 = frame_decode(buffer, &decoded_frame4);
+    assert(decode_result4);  // should return false
 }
