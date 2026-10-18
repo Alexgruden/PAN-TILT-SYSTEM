@@ -21,3 +21,6 @@ CMakeUserPresets.json
 .history/
 .vscode/
 .DS_Store
+
+#C
+firmware/common/test_frame
