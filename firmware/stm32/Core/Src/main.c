@@ -18,10 +18,12 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 
 /* USER CODE END Includes */
 
@@ -65,6 +67,8 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+  uint8_t byte;
+  char msg[8];
 
   /* USER CODE END 1 */
 
@@ -86,6 +90,8 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -97,6 +103,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    if (HAL_UART_Receive(&huart1, &byte, 1, 100) == HAL_OK) {
+      int len = snprintf(msg, sizeof msg, "%02X ", byte);
+      HAL_UART_Transmit(&huart2, (uint8_t *)msg, len, 100);
+    }
   }
   /* USER CODE END 3 */
 }
