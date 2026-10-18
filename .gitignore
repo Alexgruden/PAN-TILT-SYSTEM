@@ -12,9 +12,15 @@ fp-info-cache
 sdkconfig.old
 managed_components/
 
+#STM
+Debug/
+
 # Editor
 build/
 CMakeUserPresets.json
 .history/
 .vscode/
 .DS_Store
+
+#C
+firmware/common/test_frame
