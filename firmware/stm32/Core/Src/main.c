@@ -22,7 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
-
+#include "frame_rx.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,7 +44,8 @@
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-
+ForwardFrame f;
+uint32_t valid_frame_count = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -103,11 +104,15 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 	  if (HAL_UART_Receive(&huart1, &byte, 1, 100) == HAL_OK) {
-	      count++;
-	      if (count >= 100) {
-	          HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	          count = 0;
+	      if (parse_rx_byte(byte,&f)) {
+	    	  valid_frame_count++;
+	    	  count++;
+	    	  if (count == 25) {
+	    	  	    	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	    	  	    	  count = 0;
+	    	  }
 	      }
+
 	  }
   }
   /* USER CODE END 3 */
