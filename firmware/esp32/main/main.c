@@ -24,12 +24,14 @@
 #include "time.h"
 #include "sys/time.h"
 
+#include "frame.h"
+
 #define SPP_TAG "SPP_INITIATOR_DEMO"
 #define EXAMPLE_DEVICE_NAME "ESP_SPP_INITIATOR"
 
 #define SPP_SHOW_DATA 0
-#define SPP_SHOW_SPEED 1
-#define SPP_SHOW_MODE SPP_SHOW_SPEED    /*Choose show mode: show data or speed*/
+#define SPP_SHOW_SPEED 0
+#define SPP_SHOW_MODE SPP_SHOW_DATA    /*Choose show mode: show data or speed*/
 
 static const esp_spp_mode_t esp_spp_mode = ESP_SPP_MODE_CB;
 static const bool esp_spp_enable_l2cap_ertm = true;
@@ -51,12 +53,15 @@ static const uint8_t inq_len = 30;
 static const uint8_t inq_num_rsps = 0;
 
 #if (SPP_SHOW_MODE == SPP_SHOW_DATA)
-#define SPP_DATA_LEN 20
+#define SPP_DATA_LEN FRAME_LEN
 #else
 #define SPP_DATA_LEN ESP_SPP_MAX_MTU
 #endif
 static uint8_t spp_data[SPP_DATA_LEN];
 static uint8_t *s_p_data = NULL; /* data pointer of spp_data */
+
+// Initialize and define the first frame to send with static values for pan, tilt, and sequence. This frame will be encoded into the spp_data buffer before sending.
+static ForwardFrame f = { .pan = 45, .tilt = -180, .sequence = 0 };
 
 static char *bda2str(uint8_t * bda, char *str, size_t size)
 {
@@ -148,6 +153,7 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
             ESP_LOGI(SPP_TAG, "ESP_SPP_OPEN_EVT handle:%"PRIu32" rem_bda:[%s]", param->open.handle,
                      bda2str(param->open.rem_bda, bda_str, sizeof(bda_str)));
             /* Start to write the first data packet */
+            frame_encode(&f, spp_data);
             esp_spp_write(param->open.handle, SPP_DATA_LEN, spp_data);
             s_p_data = spp_data;
             gettimeofday(&time_old, NULL);
@@ -337,10 +343,6 @@ void app_main(void)
 {
     esp_err_t ret = ESP_OK;
     char bda_str[18] = {0};
-
-    for (int i = 0; i < SPP_DATA_LEN; ++i) {
-        spp_data[i] = i;
-    }
 
     ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
