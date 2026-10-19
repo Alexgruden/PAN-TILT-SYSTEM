@@ -197,10 +197,7 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 #if (SPP_SHOW_MODE == SPP_SHOW_DATA)
         ESP_LOGI(SPP_TAG, "ESP_SPP_CONG_EVT cong:%d", param->cong.cong);
 #endif
-        if (param->cong.cong == 0) {
-            /* Send the privous (partial) data packet or the next data packet. */
-            esp_spp_write(param->write.handle, spp_data + SPP_DATA_LEN - s_p_data, s_p_data);
-        }
+        congested = param->cong.cong;
         break;
     case ESP_SPP_SRV_OPEN_EVT:
         ESP_LOGI(SPP_TAG, "ESP_SPP_SRV_OPEN_EVT");
@@ -304,12 +301,12 @@ void send_task(void *arg)
 {
     TickType_t last_wake = xTaskGetTickCount(); // Note last wake time for vTaskDelayUntil
     while (1) {
-        if (connected) { 
+        if (connected && !congested) { 
             frame_encode(&f, spp_data);
             esp_spp_write(spp_handle, SPP_DATA_LEN, spp_data);
             f.sequence++; // Increment the sequence number for the next frame
-            vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(20)); // Delay for 20 ms before sending the next frame
         }
+        vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(20)); // Delay for 20 ms before sending the next frame
     }
 }
 
