@@ -63,6 +63,12 @@ static uint8_t *s_p_data = NULL; /* data pointer of spp_data */
 // Initialize and define the first frame to send with static values for pan, tilt, and sequence. This frame will be encoded into the spp_data buffer before sending.
 static ForwardFrame f = { .pan = 45, .tilt = -180, .sequence = 0 };
 
+// Define a handle for the SPP connection. This will be set when the connection is established and can be used to send data. 
+static uint32_t spp_handle = 0;
+
+static volatile bool connected = false; // Flag to indicate if the SPP connection is established. This can be used in the main loop or other tasks to check the connection status before attempting to send data.
+static volatile bool congested = false; // Flag to indicate if the SPP connection is congested. This can be used to pause sending data until the congestion clears.
+
 static char *bda2str(uint8_t * bda, char *str, size_t size)
 {
     if (bda == NULL || str == NULL || size < 18) {
@@ -153,8 +159,8 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
             ESP_LOGI(SPP_TAG, "ESP_SPP_OPEN_EVT handle:%"PRIu32" rem_bda:[%s]", param->open.handle,
                      bda2str(param->open.rem_bda, bda_str, sizeof(bda_str)));
             /* Start to write the first data packet */
-            frame_encode(&f, spp_data);
-            esp_spp_write(param->open.handle, SPP_DATA_LEN, spp_data);
+            connected = true;
+            spp_handle = param->open.handle;
             s_p_data = spp_data;
             gettimeofday(&time_old, NULL);
         } else {
@@ -164,6 +170,7 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
     case ESP_SPP_CLOSE_EVT:
         ESP_LOGI(SPP_TAG, "ESP_SPP_CLOSE_EVT status:%d handle:%"PRIu32" close_by_remote:%d", param->close.status,
                  param->close.handle, param->close.async);
+        connected = false;
         break;
     case ESP_SPP_START_EVT:
         ESP_LOGI(SPP_TAG, "ESP_SPP_START_EVT");
@@ -180,57 +187,11 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
         break;
     case ESP_SPP_WRITE_EVT:
         if (param->write.status == ESP_SPP_SUCCESS) {
-            if (s_p_data + param->write.len == spp_data + SPP_DATA_LEN) {
-                /* Means the previous data packet be sent completely, send a new data packet */
-                s_p_data = spp_data;
-            } else {
-                /*
-                 * Means the previous data packet only be sent partially due to the lower layer congestion, resend the
-                 * remainning data.
-                 */
-                s_p_data += param->write.len;
-            }
-#if (SPP_SHOW_MODE == SPP_SHOW_DATA)
-            /*
-             * We only show the data in which the data length is less than 128 here. If you want to print the data and
-             * the data rate is high, it is strongly recommended to process them in other lower priority application task
-             * rather than in this callback directly. Since the printing takes too much time, it may stuck the Bluetooth
-             * stack and also have a effect on the throughput!
-             */
-            ESP_LOGI(SPP_TAG, "ESP_SPP_WRITE_EVT len:%d handle:%"PRIu32" cong:%d", param->write.len, param->write.handle,
-                     param->write.cong);
-            if (param->write.len < 128) {
-                ESP_LOG_BUFFER_HEX("", spp_data, param->write.len);
-                /* Delay a little to avoid the task watch dog */
-                vTaskDelay(pdMS_TO_TICKS(10));
-            }
-#else
-            gettimeofday(&time_new, NULL);
-            data_num += param->write.len;
-            if (time_new.tv_sec - time_old.tv_sec >= 3) {
-                print_speed();
-            }
-#endif
+            ESP_LOG_BUFFER_HEX(SPP_TAG, spp_data, param->write.len);
         } else {
-            /* Means the previous data packet is not sent at all, need to send the whole data packet again. */
             ESP_LOGE(SPP_TAG, "ESP_SPP_WRITE_EVT status:%d", param->write.status);
         }
-
-        if (!param->write.cong) {
-            /* The lower layer is not congested, you can send the next data packet now. */
-            esp_spp_write(param->write.handle, spp_data + SPP_DATA_LEN - s_p_data, s_p_data);
-        } else {
-            /*
-             * The lower layer is congested now, don't send the next data packet until receiving the
-             * ESP_SPP_CONG_EVT with param->cong.cong == 0.
-             */
-            ;
-        }
-
-        /*
-         * If you don't want to manage this complicated process, we also provide the SPP VFS mode that hides the
-         * implementation details. However, it is less efficient and will block the caller until all data has been sent.
-         */
+        congested = param->write.cong;
         break;
     case ESP_SPP_CONG_EVT:
 #if (SPP_SHOW_MODE == SPP_SHOW_DATA)
@@ -339,6 +300,19 @@ static void esp_bt_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
     }
 }
 
+void send_task(void *arg)
+{
+    TickType_t last_wake = xTaskGetTickCount(); // Note last wake time for vTaskDelayUntil
+    while (1) {
+        if (connected) { 
+            frame_encode(&f, spp_data);
+            esp_spp_write(spp_handle, SPP_DATA_LEN, spp_data);
+            f.sequence++; // Increment the sequence number for the next frame
+            vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(20)); // Delay for 20 ms before sending the next frame
+        }
+    }
+}
+
 void app_main(void)
 {
     esp_err_t ret = ESP_OK;
@@ -418,4 +392,13 @@ void app_main(void)
     esp_bt_gap_set_pin(pin_type, 0, pin_code);
 
     ESP_LOGI(SPP_TAG, "Own address:[%s]", bda2str((uint8_t *)esp_bt_dev_get_address(), bda_str, sizeof(bda_str)));
+
+    xTaskCreate(
+        send_task,       // Task function
+        "SendTask",      // Name
+        4096,             // Stack size
+        NULL,             // Parameters
+        3,                // Priority
+        NULL              // Task handle
+    );
 }
