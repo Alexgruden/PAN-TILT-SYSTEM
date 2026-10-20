@@ -24,8 +24,13 @@ static const char *TAG = "IMU";
 #define MPU9250_RESET_BIT           7
 #define IMU_READ_LEN                 14          /*!< Number of bytes to read from the IMU sensor */ 
 
+#define ACCEL_Z_BIAS 1460
+
 static i2c_master_bus_handle_t s_bus_handle;
 static i2c_master_dev_handle_t s_dev_handle;
+
+static int32_t gyro_x_avg = 0;
+static int32_t gyro_z_avg = 0;
 
 
 /**
@@ -91,10 +96,41 @@ esp_err_t imu_read(IMUData *readings) {
 
     readings->ax = (int16_t)((data[0] << 8) | data[1]);
     readings->ay = (int16_t)((data[2] << 8) | data[3]);
-    readings->az = (int16_t)((data[4] << 8) | data[5]);
-    readings->gx = (int16_t)((data[8] << 8) | data[9]);
+    readings->az = ((int16_t)((data[4] << 8) | data[5]) - ACCEL_Z_BIAS);
+    readings->gx = ((int16_t)((data[8] << 8) | data[9]) - gyro_x_avg);
     readings->gy = (int16_t)((data[10] << 8) | data[11]);
-    readings->gz = (int16_t)((data[12] << 8) | data[13]);
+    readings->gz = ((int16_t)((data[12] << 8) | data[13]) - gyro_z_avg);
 
     return ESP_OK;
+}
+/** 
+ * @brief Calibrate the IMU sensor.
+ * 
+ * Log “hold still,” take 100 readings 20 ms apart (2 seconds), and average gyro X and gyro Z.
+*/
+void imu_calibrate(void) {
+    ESP_LOGI(TAG, "Hold still!!!!!!");
+
+    gyro_x_avg = 0;
+    gyro_z_avg = 0;
+    int32_t gx_sum = 0;
+    int32_t gz_sum = 0;
+    uint8_t count = 0;
+
+    for (int i = 0; i < 100; i++) {
+        IMUData readings; 
+        if (imu_read(&readings) == ESP_OK) {
+            gx_sum += readings.gx;
+            gz_sum += readings.gz;
+            count++;
+        }
+        vTaskDelay(pdMS_TO_TICKS(20)); // Delay for 20 ms between readings
+    }
+
+    if (count == 0) {
+        ESP_LOGE(TAG, "No valid IMU readings for calibration");
+        return;
+    }
+    gyro_x_avg = gx_sum / count;
+    gyro_z_avg = gz_sum / count;
 }

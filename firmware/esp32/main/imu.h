@@ -34,4 +34,11 @@ esp_err_t imu_read(IMUData *readings);
  */
 void imu_init(void);
 
+/**
+ * @brief Calibrate the IMU sensor.
+ * 
+ * This function performs a calibration routine for the IMU sensor. It takes multiple readings over a period of time while the sensor is held still, and calculates average offsets for the gyroscope readings to improve accuracy.
+ */
+void imu_calibrate(void);
+
 #endif // IMU_H

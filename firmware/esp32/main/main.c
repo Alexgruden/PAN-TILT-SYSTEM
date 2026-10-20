@@ -401,6 +401,7 @@ void app_main(void)
     ESP_LOGI(SPP_TAG, "Own address:[%s]", bda2str((uint8_t *)esp_bt_dev_get_address(), bda_str, sizeof(bda_str)));
 
     imu_init(); // Initialize the IMU sensor
+    imu_calibrate(); // Calibrate the IMU sensor to improve accuracy
 
     xTaskCreate(
         send_task,       // Task function
