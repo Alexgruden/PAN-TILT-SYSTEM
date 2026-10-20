@@ -61,7 +61,7 @@ static uint8_t spp_data[SPP_DATA_LEN];
 static uint8_t *s_p_data = NULL; /* data pointer of spp_data */
 
 // Initialize and define the first frame to send with static values for pan, tilt, and sequence. This frame will be encoded into the spp_data buffer before sending.
-static ForwardFrame f = { .pan = 45, .tilt = -180, .sequence = 0 };
+static ForwardFrame f = { .pan = 135, .tilt = 90, .sequence = 0 };
 
 // Define a handle for the SPP connection. This will be set when the connection is established and can be used to send data. 
 static uint32_t spp_handle = 0;

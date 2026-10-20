@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include "frame_rx.h"
+#include "servo.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -124,9 +125,11 @@ int main(void)
 	    	  valid_frame_count++;
 	    	  count++;
 	    	  if (count == 25) {
-	    	  	    	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	    	  	    	  count = 0;
+	    		  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	    	  	  count = 0;
 	    	  }
+	    	  servo_pan = pan_to_pulsewidth(f.pan);
+	    	  servo_tilt = tilt_to_pulsewidth(f.tilt);
 	      }
 
 	  }
