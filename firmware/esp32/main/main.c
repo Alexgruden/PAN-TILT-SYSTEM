@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include "imu.h"
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "freertos/FreeRTOS.h"
@@ -23,8 +24,10 @@
 
 #include "time.h"
 #include "sys/time.h"
+#include <math.h>
 
 #include "frame.h"
+#include "imu.h"
 
 #define SPP_TAG "SPP_INITIATOR_DEMO"
 #define EXAMPLE_DEVICE_NAME "ESP_SPP_INITIATOR"
@@ -299,17 +302,40 @@ static void esp_bt_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *pa
 
 void send_task(void *arg)
 {
+    IMUData imu_readings;
     TickType_t last_wake = xTaskGetTickCount(); // Note last wake time for vTaskDelayUntil
+    float pan_deg = 0;
+    uint8_t count = 0;
     while (1) {
+        float tilt_deg = 0;
+        if (imu_read(&imu_readings) == ESP_OK) { // Read IMU data into the imu_readings structure
+            tilt_deg = atan2f(imu_readings.ay, imu_readings.az) * 180 / M_PI;
+            if (tilt_deg < -90) {
+                tilt_deg = -90;
+            } else if (tilt_deg > 90){
+                tilt_deg = 90;
+            }
+            f.tilt = lroundf(90 + tilt_deg);
+
+            pan_deg += (imu_readings.gz / 131.0f) * 0.02f;
+            if (pan_deg < -135) {
+                pan_deg = -135;
+            } else if (pan_deg > 135){
+                pan_deg = 135;
+            }
+            f.pan = lroundf(135 + pan_deg);
+        }
         if (connected && !congested) { 
             frame_encode(&f, spp_data);
             esp_spp_write(spp_handle, SPP_DATA_LEN, spp_data);
-            f.sequence++; // Increment the sequence number for the next frame
-            f.tilt += 1; // Increment tilt for demonstration purposes
-            if (f.tilt > 180) { // Wrap around tilt if it exceeds 180 degrees
-                f.tilt = 0;
-            }
+            f.sequence++; // Increment the sequence number for the next frame'
+            count++;
         }
+        if (count > 25) {
+            ESP_LOGI(SPP_TAG, "Accel X=%6d Y=%6d Z=%6d | Gyro X=%6d Y=%6d Z=%6d", imu_readings.ax, imu_readings.ay, imu_readings.az, imu_readings.gx, imu_readings.gy, imu_readings.gz);
+            count = 0;        
+        }
+        ESP_LOGI(SPP_TAG, "Pan=%3d Tilt=%3d Sequence=%3d", f.pan, f.tilt, f.sequence);
         vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(20)); // Delay for 20 ms before sending the next frame
     }
 }
@@ -393,6 +419,9 @@ void app_main(void)
     esp_bt_gap_set_pin(pin_type, 0, pin_code);
 
     ESP_LOGI(SPP_TAG, "Own address:[%s]", bda2str((uint8_t *)esp_bt_dev_get_address(), bda_str, sizeof(bda_str)));
+
+    imu_init(); // Initialize the IMU sensor
+    imu_calibrate(); // Calibrate the IMU sensor to improve accuracy
 
     xTaskCreate(
         send_task,       // Task function
