@@ -32,8 +32,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define max_pwm 2000
-#define min_pwm 1000
+#define MAX_PWM 2000
+#define MIN_PWM 1000
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -66,7 +66,12 @@ static void MX_TIM3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+bool clamp_limits (uint32_t servo_command) {
+	if (servo_command < MAX_PWM && servo_command > MIN_PWM) {
+		return true;
+	}
+	return false;
+}
 /* USER CODE END 0 */
 
 /**
@@ -102,6 +107,8 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 
   /* USER CODE END 2 */
 
@@ -123,6 +130,9 @@ int main(void)
 	      }
 
 	  }
+	  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, servo_pan);
+	  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, servo_tilt);
+
   }
   /* USER CODE END 3 */
 }

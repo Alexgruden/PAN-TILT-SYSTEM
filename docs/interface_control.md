@@ -40,3 +40,8 @@
 - Byte 1-7 and 9 are identical but respose from servos not instructions
 - Byte 8: SYS_STAT - Instead of using the whole byte to indicate 1 status, the each bit is used to determine a single status
     - Examples could include: Bluetooth connection ok? 0 = no, 1 = yes, Servos responding? 0 = no, 1 = yes
+
+
+Servo	Range	Motion	µs per degree	Center
+Pan	325 to 2600 µs (2275 µs)	270°	2275 ÷ 270 ≈ 8.4	≈ 1460 (straight ahead)
+Tilt	500 to 2350 µs (1850 µs)	180°	1850 ÷ 180 ≈ 10.3	1450 (straight up)
