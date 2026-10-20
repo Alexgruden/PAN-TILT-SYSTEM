@@ -61,7 +61,7 @@ static uint8_t spp_data[SPP_DATA_LEN];
 static uint8_t *s_p_data = NULL; /* data pointer of spp_data */
 
 // Initialize and define the first frame to send with static values for pan, tilt, and sequence. This frame will be encoded into the spp_data buffer before sending.
-static ForwardFrame f = { .pan = 45, .tilt = -180, .sequence = 0 };
+static ForwardFrame f = { .pan = 135, .tilt = 90, .sequence = 0 };
 
 // Define a handle for the SPP connection. This will be set when the connection is established and can be used to send data. 
 static uint32_t spp_handle = 0;
@@ -197,10 +197,7 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 #if (SPP_SHOW_MODE == SPP_SHOW_DATA)
         ESP_LOGI(SPP_TAG, "ESP_SPP_CONG_EVT cong:%d", param->cong.cong);
 #endif
-        if (param->cong.cong == 0) {
-            /* Send the privous (partial) data packet or the next data packet. */
-            esp_spp_write(param->write.handle, spp_data + SPP_DATA_LEN - s_p_data, s_p_data);
-        }
+        congested = param->cong.cong;
         break;
     case ESP_SPP_SRV_OPEN_EVT:
         ESP_LOGI(SPP_TAG, "ESP_SPP_SRV_OPEN_EVT");
@@ -304,12 +301,16 @@ void send_task(void *arg)
 {
     TickType_t last_wake = xTaskGetTickCount(); // Note last wake time for vTaskDelayUntil
     while (1) {
-        if (connected) { 
+        if (connected && !congested) { 
             frame_encode(&f, spp_data);
             esp_spp_write(spp_handle, SPP_DATA_LEN, spp_data);
             f.sequence++; // Increment the sequence number for the next frame
-            vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(20)); // Delay for 20 ms before sending the next frame
+            f.tilt += 1; // Increment tilt for demonstration purposes
+            if (f.tilt > 180) { // Wrap around tilt if it exceeds 180 degrees
+                f.tilt = 0;
+            }
         }
+        vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(20)); // Delay for 20 ms before sending the next frame
     }
 }
 
