@@ -305,6 +305,10 @@ void send_task(void *arg)
             frame_encode(&f, spp_data);
             esp_spp_write(spp_handle, SPP_DATA_LEN, spp_data);
             f.sequence++; // Increment the sequence number for the next frame
+            f.tilt += 1; // Increment tilt for demonstration purposes
+            if (f.tilt > 180) { // Wrap around tilt if it exceeds 180 degrees
+                f.tilt = 0;
+            }
         }
         vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(20)); // Delay for 20 ms before sending the next frame
     }
