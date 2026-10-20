@@ -323,7 +323,7 @@ void send_task(void *arg)
             } else if (pan_deg > 135){
                 pan_deg = 135;
             }
-            f.pan = lrounf(135 + pan_deg);
+            f.pan = lroundf(135 + pan_deg);
         }
         if (connected && !congested) { 
             frame_encode(&f, spp_data);
@@ -335,7 +335,7 @@ void send_task(void *arg)
             ESP_LOGI(SPP_TAG, "Accel X=%6d Y=%6d Z=%6d | Gyro X=%6d Y=%6d Z=%6d", imu_readings.ax, imu_readings.ay, imu_readings.az, imu_readings.gx, imu_readings.gy, imu_readings.gz);
             count = 0;        
         }
-        EPS_LOGI(SPP_TAG, "Pan=%3d Tilt=%3d Sequence=%3d", f.pan, f.tilt, f.sequence);
+        ESP_LOGI(SPP_TAG, "Pan=%3d Tilt=%3d Sequence=%3d", f.pan, f.tilt, f.sequence);
         vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(20)); // Delay for 20 ms before sending the next frame
     }
 }
