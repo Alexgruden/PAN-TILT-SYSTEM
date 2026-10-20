@@ -1,4 +1,11 @@
 #include "imu.h"
+#include "esp_err.h"
+#include "sdkconfig.h"
+#include "esp_log.h"
+#include "driver/i2c_master.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 
 static const char *TAG = "IMU";
 
@@ -15,9 +22,10 @@ static const char *TAG = "IMU";
 #define MPU9250_PWR_MGMT_1_REG_ADDR 0x6B        /*!< Register addresses of the power management register */
 #define MPU9250_ACCEL_XOUT_H_REG_ADDR 0x3B    /*!< Register addresses of the accelerometer data registers */
 #define MPU9250_RESET_BIT           7
+#define IMU_READ_LEN                 14          /*!< Number of bytes to read from the IMU sensor */ 
 
-static i2c_master_bus_handle_t bus_handle;
-static i2c_master_dev_handle_t dev_handle;
+static i2c_master_bus_handle_t s_bus_handle;
+static i2c_master_dev_handle_t s_dev_handle;
 
 
 /**
@@ -60,15 +68,33 @@ static void i2c_master_init(i2c_master_bus_handle_t *bus_handle, i2c_master_dev_
     ESP_ERROR_CHECK(i2c_master_bus_add_device(*bus_handle, &dev_config, dev_handle));
 }
 
-imu_init(void) {
-    i2c_master_init(&bus_handle, &dev_handle);
-    ESP_LOGI(TAG, "I2C initialized succssfully");
+void imu_init(void) {
+    i2c_master_init(&s_bus_handle, &s_dev_handle);
+    ESP_LOGI(TAG, "I2C initialized successfully");
 
     // Reset to known start state.
-    ESP_ERROR_CHECK(mpu9250_register_write_byte(dev_handle, MPU9250_PWR_MGMT_1_REG_ADDR, 1 << MPU9250_RESET_BIT));
+    ESP_ERROR_CHECK(mpu9250_register_write_byte(s_dev_handle, MPU9250_PWR_MGMT_1_REG_ADDR, 1 << MPU9250_RESET_BIT));
 
     vTaskDelay(pdMS_TO_TICKS(100)); // Delay for 100 ms to allow the reset to complete
 
     //Wake up the MPU9250 by clearing the sleep bit in the power management register
-    ESP_ERROR_CHECK(mpu9250_register_write_byte(dev_handle, MPU9250_PWR_MGMT_1_REG_ADDR, 0x01));
+    ESP_ERROR_CHECK(mpu9250_register_write_byte(s_dev_handle, MPU9250_PWR_MGMT_1_REG_ADDR, 0x01));
+}
+
+esp_err_t imu_read(IMUData *readings) {
+    uint8_t data[IMU_READ_LEN] = {0};
+    esp_err_t ret = mpu9250_register_read(s_dev_handle, MPU9250_ACCEL_XOUT_H_REG_ADDR, data, IMU_READ_LEN);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to read IMU data: %s", esp_err_to_name(ret));
+        return ret;
+    }
+
+    readings->ax = (int16_t)((data[0] << 8) | data[1]);
+    readings->ay = (int16_t)((data[2] << 8) | data[3]);
+    readings->az = (int16_t)((data[4] << 8) | data[5]);
+    readings->gx = (int16_t)((data[8] << 8) | data[9]);
+    readings->gy = (int16_t)((data[10] << 8) | data[11]);
+    readings->gz = (int16_t)((data[12] << 8) | data[13]);
+
+    return ESP_OK;
 }
