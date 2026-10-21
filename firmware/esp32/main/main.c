@@ -315,7 +315,7 @@ void send_task(void *arg)
             } else if (tilt_deg > 90){
                 tilt_deg = 90;
             }
-            f.tilt = lroundf(90 + tilt_deg);
+            f.tilt = lroundf(90 + -tilt_deg);
 
             pan_deg += (imu_readings.gz / 131.0f) * 0.02f;
             if (pan_deg < -135) {
